@@ -51,8 +51,31 @@ ticks = 10
 fig, ax = plt.subplots()
 df.plot(ax=ax)
 fig.savefig('output_plot.png')
-# グラフの表示
 
+
+# データをスムージングするために移動平均を計算
+window_size = 3  # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
+smoothed_data = df['price'].rolling(window=window_size).mean()
+smoothed_data = df['price'].rolling(window=window_size).mean()
+
+
+# グラフの描画
+plt.plot(df['date_year'], smoothed_data, label=f'Smoothed (window size={window_size})')
+plt.title('Smoothed Data with Trend Line')
+plt.xlabel('date_year')
+plt.ylabel('price')
+plt.legend()
+
+# X軸のメモリを10個飛ばしで表示
+x_ticks = df['date_year'][::10]
+plt.xticks(x_ticks)
+
+# グラフをファイルに保存
+output_file_path = 'output_graph_simple.png'  # 保存するファイルのパス
+plt.savefig(output_file_path)
+
+
+# グラフの表示
 # plt.show()
 
 # ターミナルから行番号を入力
