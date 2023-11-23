@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from scipy.signal import argrelextrema
 
 def describe_difference(num_before: int, num_after: int) -> str:
     
@@ -50,12 +51,12 @@ ticks = 10
 
 fig, ax = plt.subplots()
 df.plot(ax=ax)
-fig.savefig('output_plot.png')
+output_file_path = 'static/output_plot.png'
+fig.savefig(output_file_path)
 
 
 # データをスムージングするために移動平均を計算
-window_size = 3  # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
-smoothed_data = df['price'].rolling(window=window_size).mean()
+window_size = 3 # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
 smoothed_data = df['price'].rolling(window=window_size).mean()
 
 
@@ -70,27 +71,43 @@ plt.legend()
 x_ticks = df['date_year'][::10]
 plt.xticks(x_ticks)
 
+# ピーク（山）と谷のインデックスを取得
+peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, order=window_size)[0]
+valleys = argrelextrema(smoothed_data.values, comparator=lambda x, y: x < y, order=window_size)[0]
+
+# 始点と終点を含む谷と山の値をリストにまとめる
+start_point = smoothed_data.iloc[0]
+end_point = smoothed_data.iloc[-1]
+peaks_values = [smoothed_data.iloc[i] for i in peaks]
+valleys_values = [smoothed_data.iloc[i] for i in valleys]
+
+# 結果を表示
+print("始点:", start_point)
+print("終点:", end_point)
+print("山の値:", peaks_values)
+print("谷の値:", valleys_values)
+
 # グラフをファイルに保存
-output_file_path = 'output_graph_simple.png'  # 保存するファイルのパス
-plt.savefig(output_file_path)
+output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
+plt.savefig(output_file_simple_path)
 
 
 # グラフの表示
 # plt.show()
 
-# ターミナルから行番号を入力
-try:
-    row1_index = int(input("Enter the line number of the first line: ")) - 1
-    row2_index = int(input("Enter the line number of the next line: ")) - 1
+# # ターミナルから行番号を入力
+# try:
+#     row1_index = int(input("Enter the line number of the first line: ")) - 1
+#     row2_index = int(input("Enter the line number of the next line: ")) - 1
 
-    # 指定した行のデータを取得
-    row1_data = df.iloc[row1_index]['price']
-    row2_data = df.iloc[row2_index]['price']
+#     # 指定した行のデータを取得
+#     row1_data = df.iloc[row1_index]['price']
+#     row2_data = df.iloc[row2_index]['price']
     
-    trend_summary = describe_difference(row1_data,row2_data)
-    print("Trend of specified data:"+ trend_summary +"can be seen in this graph")
+#     trend_summary = describe_difference(row1_data,row2_data)
+#     print("Trend of specified data:"+ trend_summary +"can be seen in this graph")
 
-except ValueError:
-    print("Invalid input. Please enter an integer line number.")
+# except ValueError:
+#     print("Invalid input. Please enter an integer line number.")
     
 
