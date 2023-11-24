@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from scipy.signal import argrelextrema
+from scipy.signal import argrelextrema,find_peaks, savgol_filter
 
 def describe_difference(num_before: int, num_after: int) -> str:
     
@@ -68,7 +68,7 @@ plt.ylabel('price')
 plt.legend()
 
 # X軸のメモリを10個飛ばしで表示
-x_ticks = df['date_year'][::10]
+x_ticks = df['date_year'][::6]
 plt.xticks(x_ticks)
 
 # ピーク（山）と谷のインデックスを取得
@@ -76,12 +76,13 @@ peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, order
 valleys = argrelextrema(smoothed_data.values, comparator=lambda x, y: x < y, order=window_size)[0]
 
 # 始点と終点を含む谷と山の値をリストにまとめる
-start_point = smoothed_data.iloc[0]
-end_point = smoothed_data.iloc[-1]
-peaks_values = [smoothed_data.iloc[i] for i in peaks]
-valleys_values = [smoothed_data.iloc[i] for i in valleys]
+start_point = (df['date_year'].iloc[0], smoothed_data.iloc[0])
+end_point = (df['date_year'].iloc[-1], smoothed_data.iloc[-1])
+peaks_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in peaks]
+valleys_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in valleys]
 
 # 結果を表示
+print("argrelextremaを用いたpeak検出法")
 print("始点:", start_point)
 print("終点:", end_point)
 print("山の値:", peaks_values)
@@ -91,6 +92,44 @@ print("谷の値:", valleys_values)
 output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
 plt.savefig(output_file_simple_path)
 
+# データをNumPyの配列に変換
+x_values = df['date_year'].values
+y_values = df['price'].values
+
+# データをスムージングするためにSavitzky-Golayフィルタを適用
+window_size = 7  # ウィンドウサイズ（調整が必要な場合は変更してください）
+order = 3  # 多項式の次数（調整が必要な場合は変更してください）
+smoothed_data = savgol_filter(y_values, window_size, order)
+
+# グラフの描画
+plt.plot(x_values, smoothed_data, label=f'Smoothed (Savitzky-Golay)')
+plt.title('Smoothed Data with Savitzky-Golay Filter')
+plt.xlabel('date_year')
+plt.ylabel('price')
+plt.legend()
+
+x_ticks = df['date_year'][::6]
+plt.xticks(x_ticks)
+
+# Savitzky-Golay法を使用してピークを検出
+peaks, _ = find_peaks(smoothed_data, height=0)  # heightはピークとみなす閾値（調整が必要な場合は変更してください）
+prominence_threshold = 0.1
+valleys_prominence, _ = find_peaks(-smoothed_data, prominence=prominence_threshold)  # ここでは prominence パラメータを使って、ピークと認識するための相対的な高さの閾値を設定しています。ただし、これはデータの特性によりますので、具体的なデータに合わせて調整
+
+start_point = (x_values[0], smoothed_data[0])
+end_point = (x_values[-1], smoothed_data[-1])
+peaks_data = [(x_values[i], smoothed_data[i]) for i in peaks]
+valleys_data = [(x_values[i], smoothed_data[i]) for i in valleys]
+
+
+print("Savitzky-Golay法を用いたpeak検出法")
+print("始点:", start_point)
+print("終点:", end_point)
+print("山の値と位置:", peaks_data)
+print("谷の値と位置:", valleys_data)
+
+output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
+plt.savefig(output_file_path)
 
 # グラフの表示
 # plt.show()
