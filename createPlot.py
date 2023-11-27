@@ -87,6 +87,7 @@ print("始点:", start_point)
 print("終点:", end_point)
 print("山の値:", peaks_values)
 print("谷の値:", valleys_values)
+print("-----------------------------")
 
 # グラフをファイルに保存
 output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
@@ -121,6 +122,52 @@ end_point = (x_values[-1], smoothed_data[-1])
 peaks_data = [(x_values[i], smoothed_data[i]) for i in peaks]
 valleys_data = [(x_values[i], smoothed_data[i]) for i in valleys]
 
+# ピークと谷の高さ比較
+peak_heights = [smoothed_data[i] for i in peaks]
+valley_depths = [-smoothed_data[i] for i in valleys]
+peak_valley_height_ratios = [peak_heights[i] / valley_depths[i] for i in range(min(len(peak_heights), len(valley_depths)))]
+
+# 対応する x 座標の値
+x_peaks = x_values[peaks]
+x_valleys = x_values[valleys]
+
+# 新しいリストを作成
+new_list = []
+
+# ループを使用して交互に挿入
+i, j = 0, 0
+while i < len(peak_heights) and j < len(valley_depths):
+    new_list.append((x_peaks[i],max(peak_heights[i], valley_depths[j])))  # 大きな方を挿入
+    new_list.append((x_valleys[j],min(peak_heights[i], valley_depths[j])))  # 小さい方を挿入
+    i += 1
+    j += 1
+
+# 残りの値を挿入
+while i < len(peak_heights):
+    new_list.append((x_peaks[i],peak_heights[i]))
+    i += 1
+
+while j < len(valley_depths):
+    new_list.append((x_valleys[j],valley_depths[j]))
+    j += 1
+    
+# 結果を表示
+print("新しいリスト:", new_list)
+    
+# テキストで傾向を表示
+for i, ratio in enumerate(peak_valley_height_ratios):
+    if ratio > 1.5:
+        trend = "exceedingly high"
+    elif ratio > 1.3:
+        trend = "incredibly high"
+    elif ratio > 1.1:
+        trend = "extremely high"
+    elif ratio < 0.5:
+        trend = "terribly low"
+    else:
+        trend = "not significant"
+
+    print(f"ピーク-{i+1}と谷-{i+1}の高さ比較: {trend} (比率: {ratio:.2f})")
 
 print("Savitzky-Golay法を用いたpeak検出法")
 print("始点:", start_point)
@@ -131,22 +178,4 @@ print("谷の値と位置:", valleys_data)
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
 
-# グラフの表示
-# plt.show()
-
-# # ターミナルから行番号を入力
-# try:
-#     row1_index = int(input("Enter the line number of the first line: ")) - 1
-#     row2_index = int(input("Enter the line number of the next line: ")) - 1
-
-#     # 指定した行のデータを取得
-#     row1_data = df.iloc[row1_index]['price']
-#     row2_data = df.iloc[row2_index]['price']
-    
-#     trend_summary = describe_difference(row1_data,row2_data)
-#     print("Trend of specified data:"+ trend_summary +"can be seen in this graph")
-
-# except ValueError:
-#     print("Invalid input. Please enter an integer line number.")
-    
 
