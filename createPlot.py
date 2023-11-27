@@ -82,12 +82,12 @@ peaks_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in peaks]
 valleys_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in valleys]
 
 # 結果を表示
-print("argrelextremaを用いたpeak検出法")
-print("始点:", start_point)
-print("終点:", end_point)
-print("山の値:", peaks_values)
-print("谷の値:", valleys_values)
-print("-----------------------------")
+# print("argrelextremaを用いたpeak検出法")
+# print("始点:", start_point)
+# print("終点:", end_point)
+# print("山の値:", peaks_values)
+# print("谷の値:", valleys_values)
+# print("-----------------------------")
 
 # グラフをファイルに保存
 output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
@@ -122,9 +122,15 @@ end_point = (x_values[-1], smoothed_data[-1])
 peaks_data = [(x_values[i], smoothed_data[i]) for i in peaks]
 valleys_data = [(x_values[i], smoothed_data[i]) for i in valleys]
 
+print("Savitzky-Golay法を用いたpeak検出法")
+print("始点:", start_point)
+print("終点:", end_point)
+print("山の値と位置:", peaks_data)
+print("谷の値と位置:", valleys_data)
+
 # ピークと谷の高さ比較
 peak_heights = [smoothed_data[i] for i in peaks]
-valley_depths = [-smoothed_data[i] for i in valleys]
+valley_depths = [smoothed_data[i] for i in valleys]
 peak_valley_height_ratios = [peak_heights[i] / valley_depths[i] for i in range(min(len(peak_heights), len(valley_depths)))]
 
 # 対応する x 座標の値
@@ -132,7 +138,7 @@ x_peaks = x_values[peaks]
 x_valleys = x_values[valleys]
 
 # 新しいリストを作成
-new_list = []
+new_list = [(x_values[0], y_values[0])]
 
 # ループを使用して交互に挿入
 i, j = 0, 0
@@ -154,28 +160,36 @@ while j < len(valley_depths):
 # 結果を表示
 print("新しいリスト:", new_list)
     
-# テキストで傾向を表示
-for i, ratio in enumerate(peak_valley_height_ratios):
-    if ratio > 1.5:
-        trend = "exceedingly high"
-    elif ratio > 1.3:
-        trend = "incredibly high"
-    elif ratio > 1.1:
-        trend = "extremely high"
-    elif ratio < 0.5:
-        trend = "terribly low"
+# 上昇と下降の比率を出力
+for i in range(len(new_list) - 1):
+    current_x, current_y = new_list[i]
+    next_x, next_y = new_list[i + 1]
+
+    ratio = abs((next_y - current_y) / current_y)
+
+    if next_y > current_y:
+        trend = "上昇"
+    elif next_y < current_y:
+        trend = "下降"
     else:
-        trend = "not significant"
+        trend = "変化なし"
 
-    print(f"ピーク-{i+1}と谷-{i+1}の高さ比較: {trend} (比率: {ratio:.2f})")
+    if ratio > 2.0:
+        adverb = "exceedingly"
+    elif ratio > 1.5:
+        adverb = "incredibly"
+    elif ratio > 1.0:
+        adverb = "very"
+    elif ratio > 0.5:
+        adverb = "terribly"
+    else:
+        adverb = "very"
 
-print("Savitzky-Golay法を用いたpeak検出法")
-print("始点:", start_point)
-print("終点:", end_point)
-print("山の値と位置:", peaks_data)
-print("谷の値と位置:", valleys_data)
+    print(f"現在の値: ({current_x}, {current_y}), 次の値: ({next_x}, {next_y}), 変化: {trend}, 比率: {adverb} {ratio:.2%}")
 
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
 
 
+new_list2 = [(x_values[0], y_values[0])]
+print(new_list2)

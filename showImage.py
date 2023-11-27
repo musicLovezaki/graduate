@@ -16,5 +16,11 @@ def simple_ver():
     
     return render_template('index.html', image_path=simple_image_path)
 
+@app.route('/Savitzky-Golay')
+def Savitzky_Golay():
+    Savitzky_Golay_path = 'static/output_graph_savitzky_golay.png'
+    
+    return render_template('index.html',image_path=Savitzky_Golay_path)
+
 if __name__ == '__main__':
     app.run(debug=True)
