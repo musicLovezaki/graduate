@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from scipy.signal import argrelextrema,find_peaks, savgol_filter
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 def describe_difference(num_before: int, num_after: int) -> str:
     
@@ -41,15 +43,18 @@ def describe_difference2(
 df = pd.read_csv('GasolinePriceTrends-Excel.csv')
 
 # グラフの描画
+
 plt.plot(df['date_year'], df['price'])
+
 plt.xticks(np.arange(0, len(df['date_year']), step=4))
 plt.xlabel('month-year')
 plt.ylabel('price')
 plt.title('Gasoline_price_Trends')
 
-ticks = 10
+ticks = 3
 
 fig, ax = plt.subplots()
+plt.xticks(rotation=270)
 df.plot(ax=ax)
 output_file_path = 'static/output_plot.png'
 fig.savefig(output_file_path)
@@ -59,16 +64,17 @@ fig.savefig(output_file_path)
 window_size = 3 # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
 smoothed_data = df['price'].rolling(window=window_size).mean()
 
-
 # グラフの描画
+
 plt.plot(df['date_year'], smoothed_data, label=f'Smoothed (window size={window_size})')
 plt.title('Smoothed Data with Trend Line')
 plt.xlabel('date_year')
 plt.ylabel('price')
 plt.legend()
 
+plt.xticks(rotation=270)
 # X軸のメモリを10個飛ばしで表示
-x_ticks = df['date_year'][::6]
+x_ticks = df['date_year'][::3]
 plt.xticks(x_ticks)
 
 # ピーク（山）と谷のインデックスを取得
@@ -98,18 +104,20 @@ x_values = df['date_year'].values
 y_values = df['price'].values
 
 # データをスムージングするためにSavitzky-Golayフィルタを適用
-window_size = 7  # ウィンドウサイズ（調整が必要な場合は変更してください）
-order = 3  # 多項式の次数（調整が必要な場合は変更してください）
+window_size = 9  # ウィンドウサイズ（調整が必要な場合は変更してください）
+order = 7  # 多項式の次数（調整が必要な場合は変更してください）
 smoothed_data = savgol_filter(y_values, window_size, order)
 
 # グラフの描画
+
 plt.plot(x_values, smoothed_data, label=f'Smoothed (Savitzky-Golay)')
 plt.title('Smoothed Data with Savitzky-Golay Filter')
 plt.xlabel('date_year')
 plt.ylabel('price')
 plt.legend()
 
-x_ticks = df['date_year'][::6]
+plt.xticks(rotation=270)
+x_ticks = df['date_year'][::3]
 plt.xticks(x_ticks)
 
 # Savitzky-Golay法を使用してピークを検出
@@ -140,56 +148,71 @@ x_valleys = x_values[valleys]
 # 新しいリストを作成
 new_list = [(x_values[0], y_values[0])]
 
-# ループを使用して交互に挿入
+
 i, j = 0, 0
-while i < len(peak_heights) and j < len(valley_depths):
-    new_list.append((x_peaks[i],max(peak_heights[i], valley_depths[j])))  # 大きな方を挿入
-    new_list.append((x_valleys[j],min(peak_heights[i], valley_depths[j])))  # 小さい方を挿入
-    i += 1
-    j += 1
+while i < len(peaks) and j < len(valleys):
+    # x 座標を日付に変換
+    peak_date = datetime.strptime(x_peaks[i], '%y-%b')
+    valley_date = datetime.strptime(x_valleys[j], '%y-%b')
+
+    if peak_date < valley_date:
+        new_list.append((x_peaks[i], max(peak_heights[i], valley_depths[j])))
+        i += 1
+    else:
+        new_list.append((x_valleys[j], min(peak_heights[i], valley_depths[j])))
+        j += 1
 
 # 残りの値を挿入
-while i < len(peak_heights):
-    new_list.append((x_peaks[i],peak_heights[i]))
+while i < len(peaks):
+    new_list.append((x_peaks[i], peak_heights[i]))
     i += 1
 
-while j < len(valley_depths):
-    new_list.append((x_valleys[j],valley_depths[j]))
+while j < len(valleys):
+    new_list.append((x_valleys[j], valley_depths[j]))
     j += 1
-    
+
+
 # 結果を表示
 print("新しいリスト:", new_list)
     
-# 上昇と下降の比率を出力
+# 上昇と下降の比率を出力、副詞を使い分けて結果を出力
 for i in range(len(new_list) - 1):
     current_x, current_y = new_list[i]
     next_x, next_y = new_list[i + 1]
 
-    ratio = abs((next_y - current_y) / current_y)
+    # 年月を日付オブジェクトに変換
+    current_date = datetime.strptime(current_x, '%y-%b')
+    next_date = datetime.strptime(next_x, '%y-%b')
+    
+    # 経過月数を計算
+    months_passed = relativedelta(next_date, current_date).months
+    
+    ratio_y = abs((next_y - current_y) / current_y)    
 
     if next_y > current_y:
-        trend = "上昇"
+        trend_y = "上昇"
     elif next_y < current_y:
-        trend = "下降"
+        trend_y = "下降"
     else:
-        trend = "変化なし"
+        trend_y = "変化なし"
 
-    if ratio > 2.0:
-        adverb = "exceedingly"
-    elif ratio > 1.5:
-        adverb = "incredibly"
-    elif ratio > 1.0:
-        adverb = "very"
-    elif ratio > 0.5:
-        adverb = "terribly"
+    if ratio_y > 0.25:
+        adverb = "極めて" 
+    elif ratio_y > 0.1:
+        adverb = "急激に" 
+    elif ratio_y > 0.075:
+        adverb = "非常に" 
+    elif ratio_y > 0.05:
+        adverb = "ひどく" 
+    elif ratio_y > 0.03:
+        adverb = "少し"
+    elif ratio_y > 0.001:
+        adverb = "わずかに"
     else:
-        adverb = "very"
+        adverb = "とても" 
 
-    print(f"現在の値: ({current_x}, {current_y}), 次の値: ({next_x}, {next_y}), 変化: {trend}, 比率: {adverb} {ratio:.2%}")
+    #print(f"{current_x}から{next_x}までに{adverb}{trend_y}した。{ratio_y:.4f}")
+    print(f"{current_x}から{next_x}までにy座標が{next_y - current_y} {trend_y}し、{months_passed}ヶ月経過しました。")
 
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
-
-
-new_list2 = [(x_values[0], y_values[0])]
-print(new_list2)
