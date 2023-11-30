@@ -128,7 +128,7 @@ valleys_prominence, _ = find_peaks(-smoothed_data, prominence=prominence_thresho
 start_point = (x_values[0], smoothed_data[0])
 end_point = (x_values[-1], smoothed_data[-1])
 peaks_data = [(x_values[i], smoothed_data[i]) for i in peaks]
-valleys_data = [(x_values[i], smoothed_data[i]) for i in valleys]
+valleys_data = [(x_values[i], smoothed_data[i]) for i in valleys_prominence]
 
 print("Savitzky-Golay法を用いたpeak検出法")
 print("始点:", start_point)
@@ -138,19 +138,20 @@ print("谷の値と位置:", valleys_data)
 
 # ピークと谷の高さ比較
 peak_heights = [smoothed_data[i] for i in peaks]
-valley_depths = [smoothed_data[i] for i in valleys]
+valley_depths = [smoothed_data[i] for i in valleys_prominence]
 peak_valley_height_ratios = [peak_heights[i] / valley_depths[i] for i in range(min(len(peak_heights), len(valley_depths)))]
 
 # 対応する x 座標の値
 x_peaks = x_values[peaks]
-x_valleys = x_values[valleys]
+x_valleys = x_values[valleys_prominence]
 
 # 新しいリストを作成
-new_list = [(x_values[0], y_values[0])]
+#new_list = [(x_values[0], y_values[0])]
+new_list = []
 
 
 i, j = 0, 0
-while i < len(peaks) and j < len(valleys):
+while i < len(peaks) and j < len(valleys_prominence):
     # x 座標を日付に変換
     peak_date = datetime.strptime(x_peaks[i], '%y-%b')
     valley_date = datetime.strptime(x_valleys[j], '%y-%b')
@@ -212,7 +213,7 @@ for i in range(len(new_list) - 1):
         adverb = "とても" 
 
     #print(f"{current_x}から{next_x}までに{adverb}{trend_y}した。{ratio_y:.4f}")
-    print(f"{current_x}から{next_x}までにy座標が{next_y - current_y} {trend_y}し、{months_passed}ヶ月経過しました。")
-
+    print(f"{current_x}から{next_x}までにy座標が{next_y - current_y} {trend_y}し、{months_passed}ヶ月経過しました。ratio{ratio_y:.3f}")
+    
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
