@@ -5,40 +5,6 @@ from scipy.signal import argrelextrema,find_peaks, savgol_filter
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-def describe_difference(num_before: int, num_after: int) -> str:
-    
-    DESCRIPTIONS = ("increase", "remain the same", "decrease")
-    description: str = ""
-    if num_after > num_before:
-        description = DESCRIPTIONS[0]
-    elif num_after == num_before:
-        description = DESCRIPTIONS[1]
-    else:
-        description = DESCRIPTIONS[2]
-        
-    return description
-
-VERB_GROUPS: tuple = (
-    ("increase", "remain the same", "decrease"),
-    ("rise","stay the same","fail"),
-)
-
-def describe_difference2(
-    num_before: int, num_after: int, verb_group_id: int
-) -> tuple[str,int]:
-    
-    description: str = ""
-    if num_after > num_before:
-        description = VERB_GROUPS[verb_group_id % len(VERB_GROUPS)][0]
-    elif num_after == num_before:
-        description = VERB_GROUPS[verb_group_id % len(VERB_GROUPS)][1]
-    else:
-        description = VERB_GROUPS[verb_group_id % len(VERB_GROUPS)][2]
-    
-    verb_group_id += 1
-    return description, verb_group_id
-
-
 # CSVファイルからデータを読み込み
 df = pd.read_csv('GasolinePriceTrends-Excel.csv')
 
@@ -65,7 +31,6 @@ window_size = 3 # 移動平均のウィンドウサイズ（調整が必要な�
 smoothed_data = df['price'].rolling(window=window_size).mean()
 
 # グラフの描画
-
 plt.plot(df['date_year'], smoothed_data, label=f'Smoothed (window size={window_size})')
 plt.title('Smoothed Data with Trend Line')
 plt.xlabel('date_year')
@@ -109,7 +74,6 @@ order = 7  # 多項式の次数（調整が必要な場合は変更してくだ�
 smoothed_data = savgol_filter(y_values, window_size, order)
 
 # グラフの描画
-
 plt.plot(x_values, smoothed_data, label=f'Smoothed (Savitzky-Golay)')
 plt.title('Smoothed Data with Savitzky-Golay Filter')
 plt.xlabel('date_year')
@@ -130,11 +94,11 @@ end_point = (x_values[-1], smoothed_data[-1])
 peaks_data = [(x_values[i], smoothed_data[i]) for i in peaks]
 valleys_data = [(x_values[i], smoothed_data[i]) for i in valleys_prominence]
 
-print("Savitzky-Golay法を用いたpeak検出法")
-print("始点:", start_point)
-print("終点:", end_point)
-print("山の値と位置:", peaks_data)
-print("谷の値と位置:", valleys_data)
+# print("Savitzky-Golay法を用いたpeak検出法")
+# print("始点:", start_point)
+# print("終点:", end_point)
+# print("山の値と位置:", peaks_data)
+# print("谷の値と位置:", valleys_data)
 
 # ピークと谷の高さ比較
 peak_heights = [smoothed_data[i] for i in peaks]
@@ -148,7 +112,6 @@ x_valleys = x_values[valleys_prominence]
 # 新しいリストを作成
 #new_list = [(x_values[0], y_values[0])]
 new_list = []
-
 
 i, j = 0, 0
 while i < len(peaks) and j < len(valleys_prominence):
@@ -174,8 +137,8 @@ while j < len(valleys):
 
 
 # 結果を表示
-print("新しいリスト:", new_list)
-    
+#print("新しいリスト:", new_list)
+sum = 0
 # 上昇と下降の比率を出力、副詞を使い分けて結果を出力
 for i in range(len(new_list) - 1):
     current_x, current_y = new_list[i]
@@ -197,23 +160,26 @@ for i in range(len(new_list) - 1):
     else:
         trend_y = "変化なし"
 
-    if ratio_y > 0.25:
+    if ratio_y > 0.4:
+        adverb  = "異次元に"
+    elif ratio_y > 0.25:
         adverb = "極めて" 
-    elif ratio_y > 0.1:
+    elif ratio_y > 0.15:
         adverb = "急激に" 
-    elif ratio_y > 0.075:
+    elif ratio_y > 0.07:
         adverb = "非常に" 
-    elif ratio_y > 0.05:
-        adverb = "ひどく" 
-    elif ratio_y > 0.03:
+    elif ratio_y > 0.04:
+        adverb = "とても"
+    elif ratio_y > 0.02:
         adverb = "少し"
-    elif ratio_y > 0.001:
+    elif ratio_y > 0.005:
         adverb = "わずかに"
     else:
-        adverb = "とても" 
+        adverb = "ほぼ変わらず" 
 
-    #print(f"{current_x}から{next_x}までに{adverb}{trend_y}した。{ratio_y:.4f}")
-    print(f"{current_x}から{next_x}までにy座標が{next_y - current_y} {trend_y}し、{months_passed}ヶ月経過しました。ratio{ratio_y:.3f}")
+    sum += ratio_y
+    
+    print(f"{current_x}から{next_x}までにy座標が__{adverb}__{trend_y}し、{months_passed}ヶ月経過しました。 y_ratio{ratio_y:.3f}")
     
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
