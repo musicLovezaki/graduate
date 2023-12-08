@@ -81,7 +81,7 @@ plt.ylabel('price')
 plt.legend()
 
 plt.xticks(rotation=270)
-x_ticks = df['date_year'][::3]
+x_ticks = df['date_year'][::2]
 plt.xticks(x_ticks)
 
 # Savitzky-Golay法を使用してピークを検出
@@ -139,6 +139,8 @@ while j < len(valleys):
 # 結果を表示
 #print("新しいリスト:", new_list)
 sum = 0
+total_months_differences = []
+
 # 上昇と下降の比率を出力、副詞を使い分けて結果を出力
 for i in range(len(new_list) - 1):
     current_x, current_y = new_list[i]
@@ -149,10 +151,16 @@ for i in range(len(new_list) - 1):
     next_date = datetime.strptime(next_x, '%y-%b')
     
     # 経過月数を計算
-    months_passed = relativedelta(next_date, current_date).months
+    delta = relativedelta(next_date, current_date)
+    months_passed = delta.months
+    years_passed = delta.years
+    total_months_defference = years_passed * 12 + months_passed
+    total_months_differences.append(total_months_defference)
+    
     
     ratio_y = abs((next_y - current_y) / current_y)    
-
+    ratio_x = (total_months_differences[i]-total_months_differences[i-1])/len(x_values)  
+    
     if next_y > current_y:
         trend_y = "上昇"
     elif next_y < current_y:
@@ -176,10 +184,12 @@ for i in range(len(new_list) - 1):
         adverb = "わずかに"
     else:
         adverb = "ほぼ変わらず" 
+    
+    
+    print(f"ration_xは{ratio_x:.3f}")
+    print(f"{current_x}から{next_x}までにy座標が__{adverb}__{trend_y}し、{total_months_differences[i]}ヶ月経過しました。 y_ratio{ratio_y:.3f}")
+    print("")
+    
 
-    sum += ratio_y
-    
-    print(f"{current_x}から{next_x}までにy座標が__{adverb}__{trend_y}し、{months_passed}ヶ月経過しました。 y_ratio{ratio_y:.3f}")
-    
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
