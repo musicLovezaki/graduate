@@ -6,7 +6,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 # CSVファイルからデータを読み込み
-df = pd.read_csv('GasolinePriceTrends-Excel.csv')
+df = pd.read_csv('apple_price.csv')
 
 # グラフの描画
 
@@ -15,15 +15,16 @@ plt.plot(df['date_year'], df['price'])
 plt.xticks(np.arange(0, len(df['date_year']), step=4))
 plt.xlabel('month-year')
 plt.ylabel('price')
-plt.title('Gasoline_price_Trends')
+plt.title('Apple_price_Trends')
 
 ticks = 3
 
 fig, ax = plt.subplots()
 plt.xticks(rotation=270)
 df.plot(ax=ax)
-output_file_path = 'static/output_plot.png'
+output_file_path = 'static/output_plot_apple.png'
 fig.savefig(output_file_path)
+plt.figure()
 
 
 # データをスムージングするために移動平均を計算
@@ -61,8 +62,9 @@ valleys_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in vall
 # print("-----------------------------")
 
 # グラフをファイルに保存
-output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
+output_file_simple_path = 'static/output_graph_apple_simple.png'  # 保存するファイルのパス
 plt.savefig(output_file_simple_path)
+plt.figure()
 
 # データをNumPyの配列に変換
 x_values = df['date_year'].values
@@ -116,8 +118,10 @@ new_list = []
 i, j = 0, 0
 while i < len(peaks) and j < len(valleys_prominence):
     # x 座標を日付に変換
-    peak_date = datetime.strptime(x_peaks[i], '%y-%b')
-    valley_date = datetime.strptime(x_valleys[j], '%y-%b')
+    
+    peak_date_str = str(x_peaks[i])
+    peak_date = datetime.strptime(peak_date_str, '%Y/%m/%d')
+    valley_date = datetime.strptime(x_valleys[j], '%Y/%m/%d')
 
     if peak_date < valley_date:
         new_list.append((x_peaks[i], max(peak_heights[i], valley_depths[j])))
@@ -153,8 +157,8 @@ for i in range(len(new_list) - 1):
     
 
     # 年月を日付オブジェクトに変換
-    current_date = datetime.strptime(current_x, '%y-%b')
-    next_date = datetime.strptime(next_x, '%y-%b')
+    current_date = datetime.strptime(current_x, '%Y/%m/%d')
+    next_date = datetime.strptime(next_x, '%Y/%m/%d')
     
     # 経過月数を計算
     delta = relativedelta(next_date, current_date)
@@ -204,5 +208,5 @@ for i in range(len(new_list) - 1):
     #print(texts[i])
     
 
-output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
+output_file_path = 'static/output_graph_apple_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)
