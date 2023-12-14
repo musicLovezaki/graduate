@@ -136,15 +136,21 @@ while j < len(valleys):
     j += 1
 
 
-# 結果を表示
-#print("新しいリスト:", new_list)
 sum = 0
+trend_y = []
+adverb = []
 total_months_differences = []
+max_value = max(new_list, key=lambda x: x[1])[1]
+min_value = min(new_list, key=lambda x: x[1])[1]
+length_y = max_value - min_value
+temp_y = 0
+texts = []
 
 # 上昇と下降の比率を出力、副詞を使い分けて結果を出力
 for i in range(len(new_list) - 1):
     current_x, current_y = new_list[i]
     next_x, next_y = new_list[i + 1]
+    
 
     # 年月を日付オブジェクトに変換
     current_date = datetime.strptime(current_x, '%y-%b')
@@ -157,38 +163,45 @@ for i in range(len(new_list) - 1):
     total_months_defference = years_passed * 12 + months_passed
     total_months_differences.append(total_months_defference)
     
-    
+    #今と次のyの値から求められる比率
     ratio_y = abs((next_y - current_y) / current_y)    
-    ratio_x = (total_months_differences[i]-total_months_differences[i-1])/len(x_values)  
+    #全体分の今のy
+    temp_ratio_y = current_y / length_y
     
     if next_y > current_y:
-        trend_y = "上昇"
+        trend_y.append("rise")
     elif next_y < current_y:
-        trend_y = "下降"
+        trend_y.append("go down")
     else:
-        trend_y = "変化なし"
+        trend_y.append("remain flat")
 
     if ratio_y > 0.4:
-        adverb  = "異次元に"
+        adverb.append("exceedingly")
     elif ratio_y > 0.25:
-        adverb = "極めて" 
+        adverb.append("incredibly") 
     elif ratio_y > 0.15:
-        adverb = "急激に" 
+        adverb.append("rapidly") 
     elif ratio_y > 0.07:
-        adverb = "非常に" 
+        adverb.append("terribly") 
     elif ratio_y > 0.04:
-        adverb = "とても"
+        
+        adverb.append("very")
     elif ratio_y > 0.02:
-        adverb = "少し"
+        adverb.append("little")
     elif ratio_y > 0.005:
-        adverb = "わずかに"
+        adverb.append("slightly")
     else:
-        adverb = "ほぼ変わらず" 
+        adverb.append("almost unchanged")
+    
+    if adverb[i] == "almost unchanged":
+        continue
+    text = f"{current_x} to {next_x} y-coordinate {adverb[i]} {trend_y[i]} and {total_months_differences[i]} months have elapsed."
+    texts.append(text)
     
     
-    print(f"ration_xは{ratio_x:.3f}")
-    print(f"{current_x}から{next_x}までにy座標が__{adverb}__{trend_y}し、{total_months_differences[i]}ヶ月経過しました。 y_ratio{ratio_y:.3f}")
-    print("")
+
+#for i in range(len(texts)):
+    #print(texts[i])
     
 
 output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス

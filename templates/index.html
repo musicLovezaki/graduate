@@ -7,5 +7,12 @@
 <body>
     <h1>Displayed Image</h1>
     <img src="{{ image_path }}" alt="Displayed Image">
+
+    <h1>Generated Texts:</h1>
+    <ul>
+        {% for text in texts %}
+            <li>{{ text }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
