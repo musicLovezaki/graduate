@@ -2,9 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask Image Display</title>
 </head>
 <body>
+    <h1>Input window size</h1>
+
+    <form action="{{ url_for('simple_ver') }}" method="get">
+        <label for="input_name">Input window size:</label>
+        <input type="text" id="input_name" name="input_name" required>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+
     <h1>Displayed Image</h1>
     <img src="{{ image_path }}" alt="Displayed Image">
 
