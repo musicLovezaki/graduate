@@ -4,6 +4,12 @@ import numpy as np
 from scipy.signal import argrelextrema,find_peaks, savgol_filter
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from flask import session
+from showImage import SI
+
+def get_session_data():
+    with SI.test_request_context('/'):
+        return session.get('input_number', None)
 
 # CSVファイルからデータを読み込み
 df = pd.read_csv('GasolinePriceTrends-Excel.csv')

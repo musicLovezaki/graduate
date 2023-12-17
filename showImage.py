@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request
-import createPlot as CP
+from flask import Flask, render_template, request, session
+
 
 app = Flask(__name__)
+app.secret_key = 'zzzzz'
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -16,17 +18,20 @@ def index():
 def simple_ver():
     image_path = 'static/output_graph_simple.png'
     generated_texts = ["-","dsds"]
-
+    
     if request.method == 'POST':
-        input_value = request.form['input_name']
-        print("Received input:", input_value)
-        
-    return render_template('index.html',texts=generated_texts, image_path=image_path)
+        input_number = int(request.form['input_number'])  # フォームからの数字を取得
+        session['input_number'] = input_number  # セッションにデータを保存
+    else:
+        input_number = session.get('input_number', None)  # セッションからデータを取得
+    
+    return render_template('index.html',texts=generated_texts, image_path=image_path,input_number=input_number)
 
 @app.route('/Savitzky-Golay', methods=['GET'])
 def Savitzky_Golay():
     Savitzky_Golay_path = 'static/output_graph_savitzky_golay.png'
-    generated_texts = CP.texts
+    #generated_texts = CP.texts
+    generated_texts = ["-","dsds"]
     
     return render_template('index.html',texts=generated_texts,image_path=Savitzky_Golay_path)
 
