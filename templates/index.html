@@ -9,8 +9,8 @@
 <body>
     <h1>Input window size</h1>
 
-    <form action="{{ url_for('simple_ver') }}" method="get">
-        <label for="input_name">Input window size:</label>
+    <form action="{{ url_for('simple_ver') }}" method="post">
+        <label for="input_number">Input window size:</label>
         <input type="nubmer" id="input_number" name="input_number" required>
         <br>
         <input type="submit" value="Submit">
@@ -19,6 +19,9 @@
     <h1>Displayed Image</h1>
     <img src="{{ image_path }}" alt="Displayed Image">
 
+    <h1>Latest Input:</h1>
+    <p>{{ input_number }}</p>
+    
     <h1>Generated Texts:</h1>
     <ul>
         {% for text in texts %}
