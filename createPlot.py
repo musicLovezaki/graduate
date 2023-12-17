@@ -1,10 +1,25 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import sqlite3
 from scipy.signal import argrelextrema,find_peaks, savgol_filter
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+# SQLiteデータベースに接続
+conn = sqlite3.connect('site.db')
+cursor = conn.cursor()
+
+# クエリを実行してデータを取得
+cursor.execute('SELECT * FROM your_table_name')
+data = cursor.fetchall()
+
+# 結果を表示
+for row in data:
+    print(row)
+
+# 接続を閉じる
+conn.close()
 
 # CSVファイルからデータを読み込み
 df = pd.read_csv('GasolinePriceTrends-Excel.csv')
