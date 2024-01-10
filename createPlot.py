@@ -1,25 +1,25 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import sqlite3
+import argparse
 from scipy.signal import argrelextrema,find_peaks, savgol_filter
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-# SQLiteデータベースに接続
-conn = sqlite3.connect('site.db')
-cursor = conn.cursor()
 
-# クエリを実行してデータを取得
-cursor.execute('SELECT * FROM your_table_name')
-data = cursor.fetchall()
+#order 7 windowsize 9
 
-# 結果を表示
-for row in data:
-    print(row)
+#windowsizeはorderサイズより大きな奇数とする
+input_windowsize = input("windowsizeを入力してください: ")
+input_polynominal_chara = input("多項式の字数を入力してください:")
+try:
+    input_windowsize = int(input_windowsize)
+    input_polynominal_chara = int(input_polynominal_chara)
+    print("入力されたwindowsize:", input_windowsize)
+    print("入力された多項式の字数:",input_polynominal_chara)
+except ValueError:
+    print("無効な入力です。数字を入力してください。")
 
-# 接続を閉じる
-conn.close()
 
 # CSVファイルからデータを読み込み
 df = pd.read_csv('GasolinePriceTrends-Excel.csv')
@@ -38,25 +38,25 @@ ticks = 3
 fig, ax = plt.subplots()
 plt.xticks(rotation=270)
 df.plot(ax=ax)
-output_file_path = 'static/output_plot.png'
+output_file_path = 'static/images/output_plot.png'
 fig.savefig(output_file_path)
 
 
 # データをスムージングするために移動平均を計算
-window_size = 9 # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
+window_size = input_windowsize # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
 smoothed_data = df['price'].rolling(window=window_size).mean()
 
 # グラフの描画
-plt.plot(df['date_year'], smoothed_data, label=f'Smoothed (window size={window_size})')
-plt.title('Smoothed Data with Trend Line')
-plt.xlabel('date_year')
-plt.ylabel('price')
-plt.legend()
+#plt.plot(df['date_year'], smoothed_data, label=f'Smoothed (window size={window_size})')
+#plt.title('Smoothed Data with Trend Line')
+#plt.xlabel('date_year')
+#plt.ylabel('price')
+#plt.legend()
 
-plt.xticks(rotation=270)
+#plt.xticks(rotation=270)
 # X軸のメモリを10個飛ばしで表示
-x_ticks = df['date_year'][::3]
-plt.xticks(x_ticks)
+#x_ticks = df['date_year'][::3]
+#plt.xticks(x_ticks)
 
 # ピーク（山）と谷のインデックスを取得
 peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, order=window_size)[0]
@@ -68,29 +68,23 @@ end_point = (df['date_year'].iloc[-1], smoothed_data.iloc[-1])
 peaks_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in peaks]
 valleys_values = [(df['date_year'].iloc[i], smoothed_data.iloc[i]) for i in valleys]
 
-# 結果を表示
-# print("argrelextremaを用いたpeak検出法")
-# print("始点:", start_point)
-# print("終点:", end_point)
-# print("山の値:", peaks_values)
-# print("谷の値:", valleys_values)
-# print("-----------------------------")
 
 # グラフをファイルに保存
-output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
-plt.savefig(output_file_simple_path)
+#output_file_simple_path = 'static/output_graph_simple.png'  # 保存するファイルのパス
+# plt.savefig(output_file_simple_path)
 
 # データをNumPyの配列に変換
 x_values = df['date_year'].values
 y_values = df['price'].values
 
-# データをスムージングするためにSavitzky-Golayフィルタを適用
-window_size = 9  # ウィンドウサイズ（調整が必要な場合は変更してください）
-order = 7  # 多項式の次数（調整が必要な場合は変更してください）
+
+#Apply Savitzky-Golay filter to smooth data
+window_size = input_windowsize 
+order = input_polynominal_chara  
 smoothed_data = savgol_filter(y_values, window_size, order)
 
 # グラフの描画
-plt.plot(x_values, smoothed_data, label=f'Smoothed (Savitzky-Golay)')
+plt.plot(x_values, smoothed_data, color = "red",label=f'Smoothed (Savitzky-Golay)')
 plt.title('Smoothed Data with Savitzky-Golay Filter')
 plt.xlabel('date_year')
 plt.ylabel('price')
@@ -126,7 +120,6 @@ x_peaks = x_values[peaks]
 x_valleys = x_values[valleys_prominence]
 
 # 新しいリストを作成
-#new_list = [(x_values[0], y_values[0])]
 new_list = []
 
 i, j = 0, 0
@@ -214,11 +207,11 @@ for i in range(len(new_list) - 1):
     text = f"{current_x} to {next_x} y-coordinate {adverb[i]} {trend_y[i]} and {total_months_differences[i]} months have elapsed."
     texts.append(text)
     
+
+
+for i in range(len(texts)):
+    print(texts[i])
     
 
-#for i in range(len(texts)):
-    #print(texts[i])
-    
-
-output_file_path = 'static/output_graph_savitzky_golay.png'  # 保存するファイルのパス
+output_file_path = 'static/images/output_graph_savitzky_golay.png'  # 保存するファイルのパス
 plt.savefig(output_file_path)

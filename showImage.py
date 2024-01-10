@@ -1,14 +1,18 @@
-from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
-
+from flask import Flask, render_template
+from createPlot import texts, window_size
+import subprocess
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # SQLiteデータベースを使用
-db = SQLAlchemy(app)
 
-class InputData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    input_number = db.Column(db.Integer)
+#FLASK_APP=showImage.py FLASK_ENV=development flask run でhtml出力できる
+
+class MyClass:
+    def __init__(self) -> None:
+        result = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE, text=True)
+        
+        print(result.stdout)
+
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -19,33 +23,18 @@ def index():
     # テンプレートに画像のパスを渡して表示
     return render_template('index.html',texts=generated_texts, image_path=image_path)
 
-@app.route('/simple_ver', methods=['GET', 'POST'])
-def simple_ver():
-    image_path = 'static/output_graph_simple.png'
-    generated_texts = ["-","dsds"]
-    
-    if request.method == 'POST':
-        input_number = int(request.form['input_number'])
-        new_input = InputData(input_number=input_number)
-        db.session.add(new_input)
-        db.session.commit()
-    else:
-        latest_input = InputData.query.order_by(InputData.id.desc()).first()
-        input_number = latest_input.input_number if latest_input else None
-    
-    return render_template('index.html',texts=generated_texts, image_path=image_path,input_number=input_number)
 
 @app.route('/Savitzky-Golay', methods=['GET'])
 def Savitzky_Golay():
+    original = 'static/output_plot.png'
     Savitzky_Golay_path = 'static/output_graph_savitzky_golay.png'
-    #generated_texts = CP.texts
-    generated_texts = ["-","dsds"]
+    generated_texts = []
     
-    return render_template('index.html',texts=generated_texts,image_path=Savitzky_Golay_path)
-#if __name__ == '__main__':
- #   db.create.all()
-  #  app.run(debug=True)
+    generated_texts = texts
+    show_window_image = window_size
+    
+    return render_template('index.html',texts=generated_texts,image_savitgolay=Savitzky_Golay_path,image_original = original,window_size = show_window_image)
+
 
 with app.app_context():
-    db.create_all()
     app.run(debug=True)
