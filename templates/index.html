@@ -14,21 +14,21 @@
     <h1>Displayed Image</h1>
 
     <div class = "figure-images">
-    <p><img src="{{ image_original }}" alt="Original Image" width="320" height="240"></p>
-    <p>Original image</p>
+    <p><img src="{{ image_original }}" alt="Original Image" width="500" height="400"></p>
+    <p><em>Original image</em></p>
     </div>
 
     <div class = "figure-images">
-    <p><img src="{{image_savitgolay}}" alt="Savitzky-golay Image" width="320" height="240"></p>
-    <p>Savitgolay image</p>
+    <p><img src="{{image_savitgolay}}" alt="Savitzky golay method Image" width="500" height="400"></p>
+    <p><em>Savitgolay image</em></p>
     </div>
-
-    
-    
     
     <h2>Window size:</h2>
     <h2>{{window_size}}</h2>
     
+    <h2>Polynomial Characters:</h2>
+    <h2>{{order}}</h2>
+
     <h1>Generated Texts:</h1>
     <ul>
         {% for text in texts %}

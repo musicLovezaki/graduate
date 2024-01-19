@@ -10,13 +10,13 @@ from dateutil.relativedelta import relativedelta
 #order 7 windowsize 9
 
 #windowsizeはorderサイズより大きな奇数とする
-input_windowsize = input("windowsizeを入力してください: ")
-input_polynominal_chara = input("多項式の字数を入力してください:")
+print("gasoline price trend")
+print("windowsize > polynominal chara")
+input_windowsize = input("Input windowsize: ")
+input_polynominal_chara = input("Input polynomial number of characters:")
 try:
     input_windowsize = int(input_windowsize)
     input_polynominal_chara = int(input_polynominal_chara)
-    print("入力されたwindowsize:", input_windowsize)
-    print("入力された多項式の字数:",input_polynominal_chara)
 except ValueError:
     print("無効な入力です。数字を入力してください。")
 
@@ -26,12 +26,14 @@ df = pd.read_csv('GasolinePriceTrends-Excel.csv')
 
 # グラフの描画
 
-plt.plot(df['date_year'], df['price'])
+plt.plot(df['date_year'], df['price'],label="Gasoline price")
 
 plt.xticks(np.arange(0, len(df['date_year']), step=4))
+plt.title('Gasoline time series data')
 plt.xlabel('month-year')
 plt.ylabel('price')
-plt.title('Gasoline_price_Trends')
+plt.legend()
+
 
 ticks = 3
 
@@ -74,7 +76,7 @@ plt.xlabel('date_year')
 plt.ylabel('price')
 plt.legend()
 
-plt.xticks(rotation=270)
+plt.xticks(rotation=45, ha='right')
 x_ticks = df['date_year'][::2]
 plt.xticks(x_ticks)
 
@@ -188,7 +190,7 @@ for i in range(len(new_list) - 1):
     
     if adverb[i] == "almost unchanged":
         continue
-    text = f"{current_x} to {next_x} y-coordinate {adverb[i]} {trend_y[i]} and {total_months_differences[i] } rationy:{ratio_y} months have elapsed."
+    text = f"{current_x} to {next_x} y-coordinate {adverb[i]} {trend_y[i]} and {total_months_differences[i] }  months have elapsed."
     texts.append(text)
     
 
@@ -198,4 +200,4 @@ for i in range(len(texts)):
     
 
 output_file_path = 'static/images/output_graph_savitzky_golay.png'  # 保存するファイルのパス
-plt.savefig(output_file_path)
+plt.savefig(output_file_path,dpi=300, bbox_inches='tight')
