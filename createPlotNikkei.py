@@ -47,7 +47,7 @@ window_size = input_windowsize # 移動平均のウィンドウサイズ（調�
 smoothed_data = df['price'].rolling(window=window_size).mean()
 
 
-# ピーク（山）と谷のインデックスを取得
+#Get indices of peaks (mountains) and valleys
 peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, order=window_size)[0]
 valleys = argrelextrema(smoothed_data.values, comparator=lambda x, y: x < y, order=window_size)[0]
 
