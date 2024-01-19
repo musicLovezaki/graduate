@@ -42,14 +42,18 @@ output_file_path = 'static/images/stockAverage.png'
 fig.savefig(output_file_path)
 
 
-# データをスムージングするために移動平均を計算
-window_size = input_windowsize # 移動平均のウィンドウサイズ（調整が必要な場合は変更してください）
+
+window_size = input_windowsize 
+
+# Calculate moving averages to smooth data
 smoothed_data = df['price'].rolling(window=window_size).mean()
 
 
 #Get indices of peaks (mountains) and valleys
-peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, order=window_size)[0]
-valleys = argrelextrema(smoothed_data.values, comparator=lambda x, y: x < y, order=window_size)[0]
+peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, \
+    order=window_size)[0]
+valleys = argrelextrema(smoothed_data.values, comparator=lambda x, y: x < y, \
+    order=window_size)[0]
 
 # 始点と終点を含む谷と山の値をリストにまとめる
 start_point = (df['date_year'].iloc[0], smoothed_data.iloc[0])
