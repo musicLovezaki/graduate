@@ -50,9 +50,11 @@ smoothed_data = df['price'].rolling(window=window_size).mean()
 
 
 #Get indices of peaks (mountains) and valleys
-peaks = argrelextrema(smoothed_data.values, comparator=lambda x, y: x > y, \
+peaks = argrelextrema(smoothed_data.values, \
+    comparator=lambda x, y: x > y, 
     order=window_size)[0]
-valleys = argrelextrema(smoothed_data.values, comparator=lambda x, y: x < y, \
+valleys = argrelextrema(smoothed_data.values, \
+    comparator=lambda x, y: x < y, 
     order=window_size)[0]
 
 # 始点と終点を含む谷と山の値をリストにまとめる
